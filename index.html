@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moon Clicking Game</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap');
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+        }
+        
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: #001f3f;
+            font-family: Arial, sans-serif;
+            color: white;
+        }
+        
+        #stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+        
+        .star {
+            position: absolute;
+            background-color: white;
+            border-radius: 50%;
+        }
+        
+        #status {
+            position: absolute;
+            top: 20px;
+            font-size: 24px;
+            font-family: 'Orbitron', sans-serif;
+            text-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff, 0 0 30px #ff00ff;
+            letter-spacing: 3px;
+        }
+        
+        #score {
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+        
+        #moon {
+            width: 200px;
+            height: 200px;
+            background-image: radial-gradient(circle, #ffffff 0%, #f0f0f0 50%, #e0e0e0 100%);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.1s, box-shadow 0.3s;
+            box-shadow: 0 0 20px 5px rgba(255, 255, 255, 0.7);
+        }
+        
+        #moon:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px 10px rgba(255, 255, 255, 0.9);
+        }
+        
+        #moon:active {
+            transform: scale(0.95);
+        }
+        
+        #moon.disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+        
+        #progress-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        #progress-bar {
+            width: 200px;
+            height: 20px;
+            background-color: #333;
+            margin-top: 10px;
+            overflow: hidden;
+            border-radius: 10px;
+        }
+        
+        #progress {
+            width: 100%;
+            height: 100%;
+            background-color: yellow;
+            transition: width 0.5s;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="stars"></div>
+    <div id="status">OFF</div>
+    <div id="score">$ 0</div>
+    <div id="moon"></div>
+    <div id="progress-container">
+        <div id="progress-text">500/500</div>
+        <div id="progress-bar">
+            <div id="progress"></div>
+        </div>
+    </div>
+
+    <script>
+        const moon = document.getElementById('moon');
+        const scoreDisplay = document.getElementById('score');
+        const progressText = document.getElementById('progress-text');
+        const progressBar = document.getElementById('progress');
+        const status = document.getElementById('status');
+        const starsContainer = document.getElementById('stars');
+
+        let score = 0;
+        let progress = 500;
+
+        function updateScore() {
+            scoreDisplay.textContent = `$ ${score}`;
+        }
+
+        function updateProgress() {
+            progressText.textContent = `${progress}/500`;
+            progressBar.style.width = `${(progress / 500) * 100}%`;
+
+            if (progress < 10) {
+                moon.classList.add('disabled');
+            } else {
+                moon.classList.remove('disabled');
+            }
+        }
+
+        moon.addEventListener('click', () => {
+            if (progress >= 10) {
+                score++;
+                progress = Math.max(0, progress - 1);
+                updateScore();
+                updateProgress();
+
+                // Add a pulse effect when clicked
+                moon.style.boxShadow = '0 0 50px 15px rgba(255, 255, 255, 1)';
+                setTimeout(() => {
+                    moon.style.boxShadow = '0 0 20px 5px rgba(255, 255, 255, 0.7)';
+                }, 200);
+            }
+        });
+
+        // Create moving stars
+        function createStar() {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.width = `${Math.random() * 2 + 1}px`;
+            star.style.height = star.style.width;
+            star.style.left = `${Math.random() * 100}%`;
+            star.style.top = `${Math.random() * 100}%`;
+            star.style.animationDuration = `${Math.random() * 50 + 50}s`;
+            starsContainer.appendChild(star);
+
+            // Move the star
+            let posX = parseFloat(star.style.left);
+            let posY = parseFloat(star.style.top);
+            const moveX = (Math.random() - 0.5) * 0.1;
+            const moveY = (Math.random() - 0.5) * 0.1;
+
+            function moveStar() {
+                posX += moveX;
+                posY += moveY;
+                if (posX < 0) posX = 100;
+                if (posX > 100) posX = 0;
+                if (posY < 0) posY = 100;
+                if (posY > 100) posY = 0;
+                star.style.left = `${posX}%`;
+                star.style.top = `${posY}%`;
+                requestAnimationFrame(moveStar);
+            }
+            moveStar();
+        }
+
+        // Create multiple stars
+        for (let i = 0; i < 100; i++) {
+            createStar();
+        }
+
+        // Increment progress every second
+        setInterval(() => {
+            if (progress < 500) {
+                progress = Math.min(500, progress + 1);
+                updateProgress();
+            }
+        }, 1000);
+
+        updateScore();
+        updateProgress();
+    </script>
+</body>
+
+</html>
